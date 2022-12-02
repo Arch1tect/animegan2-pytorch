@@ -12,12 +12,15 @@ app.post("/api/v1/animate-photo", async (req, res) => {
   const arrayBuffer = await response.arrayBuffer()
 
   const fileName = `${userId}.jpg`
-  const inputFilePath = `animegan/input/${fileName}`
-  const outputFilePath = `animegan/output/${fileName}`
+  const inputFilePath = path.join(__dirname, `animegan/input/${fileName}`)
+  console.log(inputFilePath)
+  const outputFilePath = path.join(__dirname, `animegan/output/${fileName}`)
+  console.log(outputFilePath)
+
   fs.writeFileSync(inputFilePath, Buffer.from(arrayBuffer))
 
   const pythonProcess = spawn("python3", [
-    "./animegan/main.py",
+    path.join(__dirname, `animegan/main.py`),
     "--input",
     inputFilePath,
     "--output",
@@ -27,11 +30,23 @@ app.post("/api/v1/animate-photo", async (req, res) => {
     console.error("Python process error out", err)
     res.send(err.toString())
   })
-
+  pythonProcess.stdout.on("data", (result) => {
+    // Do something with the data returned from python script
+    console.log(result.toString())
+  })
+  pythonProcess.stderr.on("data", (result) => {
+    // Do something with the data returned from python script
+    console.log(result.toString())
+  })
   pythonProcess.on("exit", function () {
-    res.sendFile(outputFilePath, { root: __dirname }, (err) => {
-      fs.unlinkSync(path.join(__dirname, inputFilePath))
-      fs.unlinkSync(path.join(__dirname, outputFilePath))
+    console.log("python exited")
+    res.sendFile(outputFilePath, (err) => {
+      if (err) {
+        res.send("failed")
+      }
+      fs.unlinkSync(inputFilePath)
+
+      fs.unlinkSync(outputFilePath)
     })
   })
 })

@@ -20,8 +20,9 @@ torch.backends.cudnn.deterministic = True
 
 def go(args):
     net = Generator()
-    net.load_state_dict(torch.load(
-        './animegan/weights/face_paint_512_v2.pt', map_location="cpu"))
+    model_path = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), 'weights/face_paint_512_v2.pt')
+    net.load_state_dict(torch.load(model_path, map_location="cpu"))
     painter = face2paint()
 
     img = Image.open(args.input).convert("RGB")
