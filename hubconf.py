@@ -47,7 +47,8 @@ def face2paint(device="cpu", size=512, side_by_side=False):
     ) -> Image.Image:
         w, h = img.size
         s = min(w, h)
-        img = img.crop(((w - s) // 2, (h - s) // 2, (w + s) // 2, (h + s) // 2))
+        img = img.crop(((w - s) // 2, (h - s) // 2,
+                       (w + s) // 2, (h + s) // 2))
         img = img.resize((size, size), Image.LANCZOS)
 
         with torch.no_grad():
