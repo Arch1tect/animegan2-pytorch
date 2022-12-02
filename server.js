@@ -16,14 +16,20 @@ app.get("/", async (req, res) => {
   const arrayBuffer = await response.arrayBuffer()
   const dateStr = new Date().toISOString().split("T")[0]
   fs.mkdirSync(`animegan/input/${dateStr}`, { recursive: true })
+  fs.mkdirSync(`animegan/output/${dateStr}`, { recursive: true })
   const fileName = `${userId}.jpg`
-  fs.writeFileSync(
-    `animegan/input/${dateStr}/${fileName}`,
-    Buffer.from(arrayBuffer)
-  )
+  const inputFilePath = `animegan/input/${dateStr}/${fileName}`
+  const outputFilePath = `animegan/output/${dateStr}/${fileName}`
+  fs.writeFileSync(inputFilePath, Buffer.from(arrayBuffer))
   console.log("hi")
 
-  const pythonProcess = spawn("python3", ["./animegan/main.py"])
+  const pythonProcess = spawn("python3", [
+    "./animegan/main.py",
+    "--input",
+    inputFilePath,
+    "--output",
+    outputFilePath,
+  ])
   let pythonCompleted = false
   pythonProcess.on("error", function (err) {
     console.error("Oh noez, teh errurz: " + err)
