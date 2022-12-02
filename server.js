@@ -2,6 +2,7 @@ const express = require("express")
 const fs = require("fs")
 
 const app = express()
+const spawn = require("child_process").spawn
 
 //Define request response in root URL (/)
 app.get("/", async (req, res) => {
@@ -21,16 +22,25 @@ app.get("/", async (req, res) => {
     Buffer.from(arrayBuffer)
   )
   console.log("hi")
-  const spawn = require("child_process").spawn
 
   const pythonProcess = spawn("python3", ["./animegan/main.py"])
+  let pythonCompleted = false
   pythonProcess.on("error", function (err) {
     console.error("Oh noez, teh errurz: " + err)
     res.send(err)
+    pythonCompleted = true
   })
   pythonProcess.stdout.on("data", (result) => {
     // Do something with the data returned from python script
-    res.send(result)
+    console.log(result.toString())
+    res.send("data")
+    pythonCompleted = true
+  })
+  pythonProcess.on("exit", function () {
+    if (!pythonCompleted) {
+      res.send("python exited without output")
+    }
+    pythonCompleted = true
   })
 })
 
