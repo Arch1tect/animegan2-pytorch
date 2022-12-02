@@ -23,33 +23,24 @@ app.post("/api/v1/animate-photo", async (req, res) => {
     "--output",
     outputFilePath,
   ])
-  let pythonCompleted = false
   pythonProcess.on("error", function (err) {
-    console.error("Oh noez, teh errurz: " + err)
-    res.send(err)
-    pythonCompleted = true
+    console.error("Python process error out", err)
+    res.send(err.toString())
   })
-  pythonProcess.stdout.on("data", (result) => {
-    // Do something with the data returned from python script
-    console.log(result.toString())
-    app.use(express.json())
-    // res.sendFile(`/app/${outputFilePath}`)
+
+  pythonProcess.on("exit", function () {
     res.sendFile(outputFilePath, { root: __dirname }, (err) => {
       fs.unlinkSync(path.join(__dirname, inputFilePath))
       fs.unlinkSync(path.join(__dirname, outputFilePath))
     })
-
-    pythonCompleted = true
-  })
-  pythonProcess.on("exit", function () {
-    if (!pythonCompleted) {
-      res.send("python exited without output")
-    }
-    pythonCompleted = true
   })
 })
 
+app.get("/health_check", (req, res) => {
+  res.send("OK")
+})
+
 //Launch listening server on port 3000
-app.listen(3001, () => {
+app.listen(3000, () => {
   console.log("app listening on port http://localhost:3000!")
 })
